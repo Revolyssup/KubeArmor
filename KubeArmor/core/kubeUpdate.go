@@ -796,7 +796,7 @@ func (dm *KubeArmorDaemon) WatchK8sPods() {
 	// create a pod
 	factory := informers.NewSharedInformerFactory(K8s.K8sClient, 0)
 	podInformer := factory.Core().V1().Pods()
-	podInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+	if _, err := podInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			if corek8spod, ok := obj.(*corev1.Pod); ok {
 				dm.updateEndPointWithPod(corek8spod, cache.Added)
@@ -812,7 +812,10 @@ func (dm *KubeArmorDaemon) WatchK8sPods() {
 				dm.updateEndPointWithPod(corek8spod, cache.Updated)
 			}
 		},
-	})
+	}); err != nil {
+		kg.Err("Couldn't Start Watching pod information")
+		return
+	}
 	go factory.Start(wait.NeverStop)
 	factory.WaitForCacheSync(wait.NeverStop)
 	dm.Logger.Print("Started watching Pods")
