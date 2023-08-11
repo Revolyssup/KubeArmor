@@ -13,6 +13,7 @@ import (
 
 	cfg "github.com/kubearmor/KubeArmor/KubeArmor/config"
 	tp "github.com/kubearmor/KubeArmor/KubeArmor/types"
+	"k8s.io/client-go/tools/cache"
 )
 
 // ======================= //
@@ -239,10 +240,10 @@ func (fd *Feeder) newMatchPolicy(policyEnabled int, policyName, src string, mp i
 }
 
 // UpdateSecurityPolicies Function
-func (fd *Feeder) UpdateSecurityPolicies(action string, endPoint tp.EndPoint) {
+func (fd *Feeder) UpdateSecurityPolicies(action cache.DeltaType, endPoint tp.EndPoint) {
 	name := endPoint.NamespaceName + "_" + endPoint.EndPointName
 
-	if action == "DELETED" {
+	if action == cache.Deleted {
 		delete(fd.SecurityPolicies, name)
 		return
 	}
